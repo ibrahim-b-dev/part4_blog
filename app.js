@@ -3,7 +3,7 @@ const config = require("./utils/config")
 const express = require("express")
 const cors = require("cors")
 
-const connectToDatabase = require("./utils/databse")
+const connectToDatabase = require("./utils/database")
 const blogsRouter = require("./controller/blogs")
 const middleware = require("./utils/middleware")
 
