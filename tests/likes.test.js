@@ -114,3 +114,66 @@ describe("mostBlogs", () => {
     assert.deepStrictEqual(result, { author: "Robert C. Martin", blogs: 3 })
   })
 })
+
+describe("mostLikes", () => {
+  test("should return null for an empty array", () => {
+    const result = listHelper.mostLikes([])
+    assert.strictEqual(result, null)
+  })
+
+  test("should return the only author if there is only one blog", () => {
+    const blogs = [
+      {
+        author: "Edsger W. Dijkstra",
+        title: "A Discipline of Programming",
+        likes: 15,
+      },
+    ]
+    const result = listHelper.mostLikes(blogs)
+    assert.deepStrictEqual(result, { author: "Edsger W. Dijkstra", likes: 15 })
+  })
+
+  test("should return the author with the most likes when multiple authors have blogs", () => {
+    const blogs = [
+      {
+        author: "Edsger W. Dijkstra",
+        title: "A Discipline of Programming",
+        likes: 15,
+      },
+      { author: "Robert C. Martin", title: "Clean Code", likes: 10 },
+      { author: "Robert C. Martin", title: "Agile Principles", likes: 8 },
+      {
+        author: "Edsger W. Dijkstra",
+        title: "Go To Statement Considered Harmful",
+        likes: 5,
+      },
+      { author: "Michael Chan", title: "React Patterns", likes: 7 },
+    ]
+    const result = listHelper.mostLikes(blogs)
+    assert.deepStrictEqual(result, { author: "Edsger W. Dijkstra", likes: 20 })
+  })
+
+  test("should return any one of the top authors if multiple authors have the same total likes", () => {
+    const blogs = [
+      {
+        author: "Edsger W. Dijkstra",
+        title: "A Discipline of Programming",
+        likes: 10,
+      },
+      { author: "Robert C. Martin", title: "Clean Code", likes: 10 },
+    ]
+    const result = listHelper.mostLikes(blogs)
+    const validResults = [
+      { author: "Edsger W. Dijkstra", likes: 10 },
+      { author: "Robert C. Martin", likes: 10 },
+    ]
+
+    assert.ok(
+      validResults.some(
+        (validResult) =>
+          validResult.author === result.author &&
+          validResult.likes === result.likes
+      )
+    )
+  })
+})
