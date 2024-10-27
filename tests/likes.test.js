@@ -101,3 +101,16 @@ describe("favoriteBlog", () => {
     )
   })
 })
+
+describe("mostBlogs", () => {
+  test("should return null for an empty array", () => {
+    const blogs = []
+    const result = listHelper.mostBlogs(blogs)
+    assert.strictEqual(result, null)
+  })
+
+  test("should return the author with the most blogs from a list", () => {
+    const result = listHelper.mostBlogs(bigBlogList)
+    assert.deepStrictEqual(result, { author: "Robert C. Martin", blogs: 3 })
+  })
+})
