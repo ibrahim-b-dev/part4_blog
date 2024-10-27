@@ -8,10 +8,12 @@
     "dev": "nodemon index.js",
     "build:ui": "rm -fr dist && cd ../part2/phonebook && npm run build && cp -r dist ../../part3_phonebook",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
+    "logs": "",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "checkdata": "node mongo.js ibrahimdev123",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test",
+    "test-file": "node --test --test-name-pattern" 
   },
   "author": "Ibrahim Dev",
   "license": "MIT",
