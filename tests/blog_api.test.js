@@ -36,6 +36,29 @@ describe("blogs", () => {
     assert.ok(blogs[0].id, "Expected 'id' property to be present")
     assert.strictEqual(blogs[0]._id, undefined)
   })
+
+  test("should be saved correctly to the database", async () => {
+    const newBlog = {
+      title: "Learn Express.js",
+      author: "Ibrahim Dev",
+      url: "https://localhost.com/learn_express",
+      likes: 7,
+    }
+
+    const blogs = await helper.blogsInDb()
+
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/)
+
+    const updatedBlogs = await helper.blogsInDb()
+
+    assert.strictEqual(updatedBlogs.length, blogs.length + 1)
+    const authors = updatedBlogs.map((b) => b.author)
+    assert(authors.includes("Ibrahim Dev"))
+  })
 })
 
 after(async () => {
