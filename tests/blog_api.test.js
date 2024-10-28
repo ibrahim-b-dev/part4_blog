@@ -24,10 +24,17 @@ describe("blogs", () => {
       .expect("Content-Type", /application\/json/)
   })
 
-  test("returns the correct amount of blog posts ", async () => {
-    const blogs = await api.get("/api/blogs")
+  test("returns the correct amount of blog posts", async () => {
+    const blogs = await helper.blogsInDb()
 
-    assert.strictEqual(blogs.body.length, helper.initialBlogs.length)
+    assert.strictEqual(blogs.length, helper.initialBlogs.length)
+  })
+
+  test("should have a unique identifier property named 'id' instead of '_id'", async () => {
+    const blogs = await helper.blogsInDb()
+
+    assert.ok(blogs[0].id, "Expected 'id' property to be present")
+    assert.strictEqual(blogs[0]._id, undefined)
   })
 })
 
