@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 const config = require("./utils/config")
 const express = require("express")
+require("express-async-errors")
 const cors = require("cors")
 
 const connectToDatabase = require("./utils/database")

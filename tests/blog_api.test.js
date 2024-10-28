@@ -91,10 +91,7 @@ describe("blogs", () => {
       url: "https://localhost.com/learn_express",
     }
 
-    await api
-      .post("/api/blogs")
-      .send(blog)
-      .expect(400)
+    await api.post("/api/blogs").send(blog).expect(400)
   })
 
   test("should respond with 400 Bad Request if 'url' is missing from the request", async () => {
@@ -103,10 +100,19 @@ describe("blogs", () => {
       author: "Ibrahim Dev",
     }
 
-    await api
-      .post("/api/blogs")
-      .send(blog)
-      .expect(400)
+    await api.post("/api/blogs").send(blog).expect(400)
+  })
+
+  test("should be deleted with status code 204 ", async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const deletedBlog = blogsAtStart[0]
+    await api.delete(`/api/blogs/${deletedBlog.id}`).expect(204)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
+
+    const blog = blogsAtEnd.find((b) => b.id === deletedBlog.id)
+    assert.strictEqual(blog, undefined)
   })
 })
 
