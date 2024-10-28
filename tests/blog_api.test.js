@@ -116,6 +116,25 @@ describe("blogs", () => {
   })
 })
 
+test("should update the number of likes for a blog post", async () => {
+  const blogsAtStart = await helper.blogsInDb()
+  const blogToUpdate = blogsAtStart[0]
+
+  const updatedLikes = blogToUpdate.likes + 1
+
+  const response = await api
+    .put(`/api/blogs/${blogToUpdate.id}`)
+    .send({ likes: updatedLikes })
+    .expect(200)
+
+  assert.strictEqual(response.body.likes, updatedLikes)
+
+  const blogsAtEnd = await helper.blogsInDb()
+  const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id)
+
+  assert.strictEqual(updatedBlog.likes, updatedLikes)
+})
+
 after(async () => {
   await mongoose.connection.close()
 })
