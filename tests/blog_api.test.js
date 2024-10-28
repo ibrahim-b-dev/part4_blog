@@ -59,6 +59,31 @@ describe("blogs", () => {
     const authors = updatedBlogs.map((b) => b.author)
     assert(authors.includes("Ibrahim Dev"))
   })
+
+  test("should default 'likes' to 0 if the property is missing from the request", async () => {
+    const blog = {
+      title: "Learn Express.js",
+      author: "Ibrahim Dev",
+      url: "https://localhost.com/learn_express",
+    }
+
+    const blogsAtStart = await helper.blogsInDb()
+
+    await api
+      .post("/api/blogs")
+      .send(blog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtStart.length + 1, blogsAtEnd.length)
+
+    const createdBlog = blogsAtEnd.filter((b) => blog.author === b.author)[0]
+    assert.strictEqual(blog.author, createdBlog.author)
+    assert.strictEqual(blog.likes, undefined)
+    assert.strictEqual(createdBlog.likes, 0)
+    assert.notEqual(blog.likes, createdBlog.likes)
+  })
 })
 
 after(async () => {
