@@ -4,16 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
+    "start": "NODE_ENV=production node index.js",
+    "dev": "NODE_ENV=development nodemon index.js",
     "build:ui": "rm -fr dist && cd ../part2/phonebook && npm run build && cp -r dist ../../part3_phonebook",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && git push",
     "logs": "",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "checkdata": "node mongo.js ibrahimdev123",
-    "test": "node --test",
-    "test-file": "node --test --test-name-pattern"
+    "test": "NODE_ENV=test node --test",
+    "test-file": "NODE_ENV=testnode --test --test-name-pattern"
   },
   "author": "Ibrahim Dev",
   "license": "MIT",
@@ -30,6 +30,7 @@
     "@stylistic/eslint-plugin-js": "^2.9.0",
     "eslint": "^9.13.0",
     "globals": "^15.11.0",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "supertest": "^7.0.0"
   }
 }
