@@ -84,6 +84,30 @@ describe("blogs", () => {
     assert.strictEqual(createdBlog.likes, 0)
     assert.notEqual(blog.likes, createdBlog.likes)
   })
+
+  test("should respond with 400 Bad Request if 'title' is missing from the request", async () => {
+    const blog = {
+      author: "Ibrahim Dev",
+      url: "https://localhost.com/learn_express",
+    }
+
+    await api
+      .post("/api/blogs")
+      .send(blog)
+      .expect(400)
+  })
+
+  test("should respond with 400 Bad Request if 'url' is missing from the request", async () => {
+    const blog = {
+      title: "Learn Express.js",
+      author: "Ibrahim Dev",
+    }
+
+    await api
+      .post("/api/blogs")
+      .send(blog)
+      .expect(400)
+  })
 })
 
 after(async () => {
