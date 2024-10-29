@@ -18,8 +18,14 @@ blogsRouter.get("/:id", async (request, response) => {
 blogsRouter.post("/", async (request, response) => {
   const body = request.body
 
-  if (body.title === undefined || body.url === undefined) {
-    return response.status(400).send()
+  if (
+    body.title === undefined ||
+    body.author === undefined ||
+    body.url === undefined
+  ) {
+    return response.status(400).json({
+      error: "title, author and url are required",
+    })
   }
 
   const blog = {

@@ -2,8 +2,8 @@ const mongoose = require("mongoose")
 
 const args = process.argv.slice(2)
 
-const url = (password) =>
-  `mongodb+srv://ibrahimdev:${password}@datanode.ca6dc.mongodb.net/BlogListApp?retryWrites=true&w=majority&appName=DataNode`
+const url = (password) => "mongodb://127.0.0.1:27017/BlogApp"
+// `mongodb+srv://ibrahimdev:${password}@datanode.ca6dc.mongodb.net/BlogListApp?retryWrites=true&w=majority&appName=DataNode`
 
 mongoose.set("strictQuery", false)
 
@@ -33,7 +33,7 @@ if (args.length === 4) {
     author,
     content,
     url: `http://someurl.com/${title}`,
-    likes: 5
+    likes: 5,
   })
 
   blog.save().then((result) => {
@@ -47,7 +47,7 @@ if (args.length === 4) {
   Blog.find({}).then((result) => {
     console.log("Blog List:")
     result.forEach((p) => {
-      console.log(`${p.title} by ${p.author}`)
+      console.log(`${p.title} by ${p.id}`)
     })
     mongoose.connection.close()
   })

@@ -19,6 +19,11 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: "malformatted id" })
   } else if (error.name === "ValidationError") {
     return response.status(400).json({ error: error.message })
+  } else if (
+    error.name === "SyntaxError" &&
+    error.type === "entity.parse.failed"
+  ) {
+    return response.status(400).json({ error: "malformed JSON syntax" })
   }
 
   next(error)
