@@ -5,6 +5,7 @@ require("express-async-errors")
 const cors = require("cors")
 
 const connectToDatabase = require("./utils/database")
+const usersRouter = require("./controller/users")
 const blogsRouter = require("./controller/blogs")
 const middleware = require("./utils/middleware")
 
@@ -20,6 +21,7 @@ app.use(express.static("dist"))
 app.use(express.json())
 app.use(middleware.requestLogger)
 
+app.use("/api/users", usersRouter)
 app.use("/api/blogs", blogsRouter)
 
 app.use(middleware.unknownEndpoint)
