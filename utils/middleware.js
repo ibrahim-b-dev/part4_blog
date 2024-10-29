@@ -24,6 +24,13 @@ const errorHandler = (error, request, response, next) => {
     error.type === "entity.parse.failed"
   ) {
     return response.status(400).json({ error: "malformed JSON syntax" })
+  } else if (
+    error.name === "MongoServerError" &&
+    error.message.includes("E11000 duplicate key error")
+  ) {
+    return response
+      .status(400)
+      .json({ error: "expected `username` to be unique" })
   }
 
   next(error)
