@@ -3,3 +3,4 @@ dist/
 .env
 notes.txt
 mongo.js
+cert/*
