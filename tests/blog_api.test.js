@@ -4,15 +4,39 @@ const mongoose = require("mongoose")
 const app = require("../app")
 const supertest = require("supertest")
 const Blog = require("../models/blog")
+const User = require("../models/user")
 const helper = require("./test_helper")
 
 const api = supertest(app)
 
 describe("blogs", () => {
+  let token
+
   beforeEach(async () => {
     await Blog.deleteMany({})
+    await User.deleteMany({})
 
-    const blogObjects = helper.initialBlogs.map((blog) => new Blog(blog))
+    const newUser = {
+      username: "testuser",
+      name: "Test User",
+      password: "123",
+    }
+
+    const createdUser = await api.post("/api/users").send(newUser)
+
+    const response = await api
+      .post("/api/login")
+      .send({ username: newUser.username, password: newUser.password })
+
+    token = response.body.token
+
+    const blogObjects = helper.initialBlogs.map((blog) => {
+      return new Blog({
+        ...blog,
+        user: createdUser.body.id,
+      })
+    })
+
     const promiseArray = blogObjects.map((blog) => blog.save())
     await Promise.all(promiseArray)
   })
@@ -47,17 +71,19 @@ describe("blogs", () => {
 
     const blogs = await helper.blogsInDb()
 
-    await api
+    const response = await api
       .post("/api/blogs")
+      .set({ Authorization: `Bearer ${token}` })
       .send(newBlog)
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
     const updatedBlogs = await helper.blogsInDb()
-
     assert.strictEqual(updatedBlogs.length, blogs.length + 1)
     const authors = updatedBlogs.map((b) => b.author)
     assert(authors.includes("Ibrahim Dev"))
+
+    assert.strictEqual(response.body.title, newBlog.title)
   })
 
   test("should default 'likes' to 0 if the property is missing from the request", async () => {
@@ -71,6 +97,7 @@ describe("blogs", () => {
 
     await api
       .post("/api/blogs")
+      .set({ Authorization: `Bearer ${token}` })
       .send(blog)
       .expect(201)
       .expect("Content-Type", /application\/json/)
@@ -91,7 +118,11 @@ describe("blogs", () => {
       url: "https://localhost.com/learn_express",
     }
 
-    await api.post("/api/blogs").send(blog).expect(400)
+    await api
+      .post("/api/blogs")
+      .set({ Authorization: `Bearer ${token}` })
+      .send(blog)
+      .expect(400)
   })
 
   test("should respond with 400 Bad Request if 'url' is missing from the request", async () => {
@@ -100,13 +131,21 @@ describe("blogs", () => {
       author: "Ibrahim Dev",
     }
 
-    await api.post("/api/blogs").send(blog).expect(400)
+    await api
+      .post("/api/blogs")
+      .set({ Authorization: `Bearer ${token}` })
+      .send(blog)
+      .expect(400)
   })
 
   test("should be deleted with status code 204 ", async () => {
     const blogsAtStart = await helper.blogsInDb()
     const deletedBlog = blogsAtStart[0]
-    await api.delete(`/api/blogs/${deletedBlog.id}`).expect(204)
+
+    await api
+      .delete(`/api/blogs/${deletedBlog.id}`)
+      .set({ Authorization: `Bearer ${token}` })
+      .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
     assert.strictEqual(blogsAtEnd.length, blogsAtStart.length - 1)
@@ -114,25 +153,38 @@ describe("blogs", () => {
     const blog = blogsAtEnd.find((b) => b.id === deletedBlog.id)
     assert.strictEqual(blog, undefined)
   })
-})
 
-test("should update the number of likes for a blog post", async () => {
-  const blogsAtStart = await helper.blogsInDb()
-  const blogToUpdate = blogsAtStart[0]
+  test("should update the number of likes for a blog post", async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
 
-  const updatedLikes = blogToUpdate.likes + 1
+    const updatedLikes = blogToUpdate.likes + 1
 
-  const response = await api
-    .put(`/api/blogs/${blogToUpdate.id}`)
-    .send({ likes: updatedLikes })
-    .expect(200)
+    const response = await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send({ likes: updatedLikes })
+      .expect(200)
 
-  assert.strictEqual(response.body.likes, updatedLikes)
+    assert.strictEqual(response.body.likes, updatedLikes)
 
-  const blogsAtEnd = await helper.blogsInDb()
-  const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id)
+    const blogsAtEnd = await helper.blogsInDb()
+    const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id)
 
-  assert.strictEqual(updatedBlog.likes, updatedLikes)
+    assert.strictEqual(updatedBlog.likes, updatedLikes)
+  })
+
+  test("create blog fails with status code 401 Unauthorized if token is missing", async function () {
+    const newBlog = {
+      title: "Unauthorized Blog",
+      author: "Test Author",
+      url: "http://example.com",
+      likes: 5,
+    }
+
+    const response = await api.post("/api/blogs").send(newBlog).expect(401)
+
+    assert.strictEqual(response.body.error, "token invalid")
+  })
 })
 
 after(async () => {
