@@ -154,7 +154,7 @@ describe("blogs", () => {
     assert.strictEqual(blog, undefined)
   })
 
-  test("should update the number of likes for a blog post", async () => {
+  test("should update the number of likes for a blog post if authorized", async () => {
     const blogsAtStart = await helper.blogsInDb()
     const blogToUpdate = blogsAtStart[0]
 
@@ -162,6 +162,7 @@ describe("blogs", () => {
 
     const response = await api
       .put(`/api/blogs/${blogToUpdate.id}`)
+      .set("Authorization", `Bearer ${token}`)
       .send({ likes: updatedLikes })
       .expect(200)
 
@@ -171,6 +172,18 @@ describe("blogs", () => {
     const updatedBlog = blogsAtEnd.find((b) => b.id === blogToUpdate.id)
 
     assert.strictEqual(updatedBlog.likes, updatedLikes)
+  })
+
+  test("should fail with 401 Unauthorized if no token is provided", async () => {
+    const blogsAtStart = await helper.blogsInDb()
+    const blogToUpdate = blogsAtStart[0]
+
+    const updatedLikes = blogToUpdate.likes + 1
+
+    await api
+      .put(`/api/blogs/${blogToUpdate.id}`)
+      .send({ likes: updatedLikes })
+      .expect(401)
   })
 
   test("create blog fails with status code 401 Unauthorized if token is missing", async function () {

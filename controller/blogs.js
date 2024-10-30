@@ -55,8 +55,35 @@ blogsRouter.post("/", middleware.userExtractor, async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.delete("/:id", middleware.userExtractor, async (request, response) => {
+blogsRouter.delete(
+  "/:id",
+  middleware.userExtractor,
+  async (request, response) => {
+    const blog = await Blog.findById(request.params.id)
+    if (!blog) {
+      return response.status(404).json({ error: "blog not found" })
+    }
+
+    if (!request.token) {
+      return response.status(401).json({ error: "token required" })
+    }
+
+    if (blog.user.toString() !== request.user.id) {
+      return response
+        .status(403)
+        .json({ error: "not authorized to delete this blog" })
+    }
+
+    // await Blog.findByIdAndDelete(request.params.id)
+    await blog.deleteOne()
+    response.status(204).end()
+  }
+)
+
+blogsRouter.put("/:id", middleware.userExtractor, async (request, response) => {
+  const { likes } = request.body
   const blog = await Blog.findById(request.params.id)
+
   if (!blog) {
     return response.status(404).json({ error: "blog not found" })
   }
@@ -70,13 +97,6 @@ blogsRouter.delete("/:id", middleware.userExtractor, async (request, response) =
       .status(403)
       .json({ error: "not authorized to delete this blog" })
   }
-
-  await Blog.findByIdAndDelete(request.params.id)
-  response.status(204).end()
-})
-
-blogsRouter.put("/:id", async (request, response) => {
-  const { likes } = request.body
 
   const updatedBlog = await Blog.findByIdAndUpdate(
     request.params.id,
